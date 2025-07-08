@@ -83,14 +83,14 @@ Important Instructions:
   try {
     let refinedText = "";
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
       const result = await model.generateContentStream([advancedPrompt]);
       for await (const chunk of result.stream) {
         refinedText += chunk.text();
       }
     } catch (err) {
-      console.warn("⚠️  Flash model failed, using fallback 1.0-pro...");
-      const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+      console.warn("⚠️  Flash model failed, using fallback 1.5-pro...");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       const result = await model.generateContentStream([advancedPrompt]);
       for await (const chunk of result.stream) {
         refinedText += chunk.text();
