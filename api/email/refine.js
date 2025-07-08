@@ -10,6 +10,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  res.setTimeout(25000, () => {
+    console.log("Request timed out");
+    return res.status(504).json({ error: "Timeout exceeded. Try again later." });
+  });
+
   try {
     await new Promise((resolve, reject) => {
       verifyToken(req, res, (err) => {
@@ -71,19 +76,25 @@ Important Instructions:
 - Just the refined body content
 `;
 
+  if (advancedPrompt.length > 12000) {
+    return res.status(400).json({ error: "Prompt too long. Try simplifying the input." });
+  }
+
   try {
     let refinedText = "";
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent(advancedPrompt);
-      const response = await result.response;
-      refinedText = response.text();
+      const result = await model.generateContentStream([advancedPrompt]);
+      for await (const chunk of result.stream) {
+        refinedText += chunk.text();
+      }
     } catch (err) {
-      console.warn("⚠️  1.5-flash failed, trying 1.0-pro...");
-      const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-      const fallbackResult = await fallbackModel.generateContent(advancedPrompt);
-      const fallbackResponse = await fallbackResult.response;
-      refinedText = fallbackResponse.text();
+      console.warn("⚠️  Flash model failed, using fallback 1.0-pro...");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+      const result = await model.generateContentStream([advancedPrompt]);
+      for await (const chunk of result.stream) {
+        refinedText += chunk.text();
+      }
     }
 
     if (!refinedText) {
