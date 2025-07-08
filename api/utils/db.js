@@ -1,5 +1,5 @@
 // /api/utils/db.js
-const mysql = require('mysql2');
+import mysql from 'mysql2';
 
 const db = mysql.createPool({
   host: process.env.MYSQL_HOST,
@@ -8,4 +8,4 @@ const db = mysql.createPool({
   database: process.env.MYSQL_DB,
 });
 
-module.exports = db;
+export default db;
