@@ -54,13 +54,13 @@ export default async function handler(req, res) {
 
     // 3. Weekday trend (Sun–Sat)
     const [trendRows] = await conn.query(`
-      SELECT 
-        DATE_FORMAT(created_at, '%a') AS day,
-        COUNT(*) AS count
-      FROM logs
-      WHERE user_id = ?
-      GROUP BY DAYOFWEEK(created_at), day;
-    `, [userId]);
+  SELECT 
+    DATE_FORMAT(timestamp, '%a') AS day,
+    COUNT(*) AS count
+  FROM logs
+  WHERE user_id = ?
+  GROUP BY DAYOFWEEK(timestamp), day;
+`, [userId]);
 
     console.log('📈 Raw trend rows:', trendRows);
 
