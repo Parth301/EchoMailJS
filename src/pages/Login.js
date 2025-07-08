@@ -106,56 +106,59 @@ const Login = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Login handler
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-  
-    // Client-side validation
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+ // Login handler
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+
+  // Client-side validation
+  if (!validateEmail(email)) {
+    setError("Please enter a valid email address");
+    await shakeAnimation();
+    setLoading(false);
+    return;
+  }
+
+  if (password.length < 8) {
+    setError("Password must be at least 8 characters");
+    await shakeAnimation();
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await axios.post('/api/auth/login', {
+      email, 
+      password
+    });
+
+    // Successful login
+    if (response.data.token && response.data.user) {
+      const { id, email: userEmail, is_admin } = response.data.user;
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("is_admin", is_admin ? "true" : "false");
+      localStorage.setItem("user_id", id);
+      localStorage.setItem("email", userEmail);
+
+      // Navigate based on admin status
+      navigate(is_admin ? "/admin" : "/dashboard");
+    } else {
+      setError("Invalid server response");
       await shakeAnimation();
-      setLoading(false);
-      return;
     }
-  
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      await shakeAnimation();
-      setLoading(false);
-      return;
-    }
-  
-    try {
-      const response = await axios.post('/api/auth/login', {
-        email, 
-        password
-      });
-  
-      // Successful login
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("is_admin", response.data.is_admin ? "true" : "false");
-        localStorage.setItem("user_id", response.data.user_id);
-        
-        // Route based on admin status
-        navigate(response.data.is_admin ? "/admin" : "/dashboard");
-      } else {
-        setError("Invalid server response");
-        await shakeAnimation();
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(
-        err.response?.data?.error || 
-        "Network error. Please try again later."
-      );
-      await shakeAnimation();
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error("Login error:", err);
+    setError(
+      err.response?.data?.error || 
+      "Network error. Please try again later."
+    );
+    await shakeAnimation();
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <ThemeProvider theme={theme}>
