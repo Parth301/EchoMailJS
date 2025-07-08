@@ -390,7 +390,7 @@ const AdminDashboard = () => {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/api/admin/users', {
+        const response = await axios.get('/api/analytics/admin', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
