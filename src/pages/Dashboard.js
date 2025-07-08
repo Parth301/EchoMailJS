@@ -982,7 +982,7 @@ const Dashboard = () => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
 
-      const response = await fetch('/api/analytics/api/analytics', {
+      const response = await fetch('/api/analytics/analytics', {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
