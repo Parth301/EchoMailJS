@@ -1,6 +1,6 @@
 // /api/pdf/generate.js
 import puppeteer from 'puppeteer';
-import verifyToken from '../utils/verifyToken';
+import verifyToken from '../utils/verifyToken.js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
