@@ -10,6 +10,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  res.setTimeout(25000, () => {
+    console.log("Request timed out");
+    return res.status(504).json({ error: "Timeout exceeded. Try again later." });
+  });
+
   try {
     await new Promise((resolve, reject) => {
       verifyToken(req, res, (err) => {
@@ -60,33 +65,38 @@ Task: Generate an email based on the following requirements:
 Original Prompt: ${prompt}
 
 Tone Guidelines: ${toneMapping[tone] || toneMapping.professional}
-
 Length Specification: ${lengthMapping[length] || lengthMapping.medium}
-
 Language: ${languageMapping[language] || languageMapping.English}
 
 Important Instructions:
-- ONLY return the generated email content.
-- Do NOT include explanations, formatting, or extra text.
-- Just the body content of the email.
+- ONLY return the generated text
+- Do NOT include any explanations, comments, or suggestions
+- Provide ONLY the generated email/text content
+- No metadata or extra information should be included
 `;
 
+  if (advancedPrompt.length > 12000) {
+    return res.status(400).json({ error: "Prompt too long. Try simplifying the input." });
+  }
+
   try {
-    let text = "";
+    let generatedText = "";
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent(advancedPrompt);
-      const response = await result.response;
-      text = response.text();
+      const result = await model.generateContentStream([advancedPrompt]);
+      for await (const chunk of result.stream) {
+        generatedText += chunk.text();
+      }
     } catch (err) {
-      console.warn("⚠️  1.5-flash failed, trying 1.0-pro...");
-      const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-      const fallbackResult = await fallbackModel.generateContent(advancedPrompt);
-      const fallbackResponse = await fallbackResult.response;
-      text = fallbackResponse.text();
+      console.warn("⚠️ Flash model failed, using fallback 1.0-pro...");
+      const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+      const result = await model.generateContentStream([advancedPrompt]);
+      for await (const chunk of result.stream) {
+        generatedText += chunk.text();
+      }
     }
 
-    if (!text) {
+    if (!generatedText) {
       return res.status(500).json({ error: "Gemini API returned empty response" });
     }
 
@@ -94,11 +104,11 @@ Important Instructions:
       .promise()
       .query(
         `INSERT INTO logs (user_id, action, prompt, response, created_at) VALUES (?, ?, ?, ?, NOW())`,
-        [userId, "generated", prompt, text]
+        [userId, "generated", prompt, generatedText]
       );
 
     res.json({
-      email_content: text,
+      email_content: generatedText,
       settings: {
         tone,
         length,
