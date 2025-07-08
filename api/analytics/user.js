@@ -1,5 +1,5 @@
-import db from '../../utils/db.js';
-import verifyToken from '../../utils/verifyToken.js';
+import db from '../utils/db.js';
+import verifyToken from '../utils/verifyToken.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
