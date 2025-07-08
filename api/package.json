@@ -1,6 +1,16 @@
 {
+  "name": "email-assistant-api",
+  "version": "1.0.0",
+  "description": "Node.js backend for EchoMailJS using Google Gemini, MySQL, and JWT auth",
   "type": "module",
+  "main": "index.js",
   "dependencies": {
-    ...
+    "axios": "^1.6.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.0",
+    "nodemailer": "^6.9.13"
   }
 }
