@@ -1,9 +1,7 @@
 // /api/email/generate.js
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const verifyToken = require('../utils/verifyToken');
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import verifyToken from '../utils/verifyToken';
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
