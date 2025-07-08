@@ -69,7 +69,7 @@ const EmailHistory = () => {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/userlogs/my-logs", {
+      const response = await axios.get("/api/analytics/user", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       
