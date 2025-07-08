@@ -1,6 +1,6 @@
 // /api/analytics/log.js
-const db = require('../utils/db');
-const verifyToken = require('../utils/verifyToken');
+import db from '../utils/db.js';
+import verifytoken from '../utils/verifyToken';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
