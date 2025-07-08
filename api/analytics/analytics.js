@@ -1,13 +1,15 @@
-// /api/analytics.js
-import db from '../utils/db.js';
-import verifyToken from '../utils/verifyToken.js';
+// /api/analytics/analytics.js
+import db from '../../utils/db.js';
+import verifyToken from '../../utils/verifyToken.js';
 
 export default async function handler(req, res) {
+  console.log('📥 Incoming request to /api/analytics/analytics');
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 1. Token verification
+  // 1. Verify Token
   try {
     await new Promise((resolve, reject) => {
       verifyToken(req, res, (err) => {
@@ -21,16 +23,16 @@ export default async function handler(req, res) {
   }
 
   const userId = req.user?.id;
+  console.log('🧑‍💻 User ID:', userId);
+
   if (!userId) {
     return res.status(401).json({ error: 'User ID not found in token' });
   }
 
-  console.log(`🔍 Fetching analytics for user ID: ${userId}`);
-
   try {
     const conn = db.promise();
 
-    // 2. Total email stats from logs table
+    // 2. Email action counts
     const [analyticsRows] = await conn.query(`
       SELECT 
         COUNT(*) AS total_emails,
@@ -48,7 +50,9 @@ export default async function handler(req, res) {
       sent_count: 0
     };
 
-    // 3. Weekly trend (Sun–Sat)
+    console.log('📊 Analytics counts:', analytics);
+
+    // 3. Weekday trend (Sun–Sat)
     const [trendRows] = await conn.query(`
       SELECT 
         DATE_FORMAT(created_at, '%a') AS day,
@@ -57,6 +61,8 @@ export default async function handler(req, res) {
       WHERE user_id = ?
       GROUP BY DAYOFWEEK(created_at), day;
     `, [userId]);
+
+    console.log('📈 Raw trend rows:', trendRows);
 
     const weekdayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const trendMap = {};
@@ -74,11 +80,11 @@ export default async function handler(req, res) {
       trend
     };
 
-    console.log('✅ Analytics Response:', response);
+    console.log('✅ Final Analytics Response:', response);
     return res.json(response);
 
   } catch (err) {
-    console.error('❌ Analytics Error:', err);
+    console.error('❌ ERROR in /api/analytics/analytics:', err.stack || err);
     return res.status(500).json({ error: 'Failed to fetch analytics' });
   }
 }
