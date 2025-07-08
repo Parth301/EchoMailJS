@@ -68,13 +68,14 @@ export default async function handler(req, res) {
 
   try {
     const mailOptions = {
-      from: `"EchoMail" <${process.env.GMAIL_USER}>`,
-      to: recipient,
-      subject: subject,
-      text: emailContent.replace(/<[^>]*>/g, ''), // plain fallback
-      html: emailContent,
-      attachments,
-    };
+  from: `"EchoMail" <${process.env.GMAIL_USER}>`,
+  to: recipient,
+  subject: subject,
+  text: emailContent, // plain fallback
+  html: `<div style="white-space: pre-line; font-family: Arial, sans-serif;">${emailContent}</div>`,
+  attachments,
+};
+
 
     const info = await transporter.sendMail(mailOptions);
 
