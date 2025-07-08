@@ -103,8 +103,8 @@ Important Instructions:
     await db
       .promise()
       .query(
-        `INSERT INTO logs (user_id, action, prompt, response, created_at) VALUES (?, ?, ?, ?, NOW())`,
-        [userId, "generated", prompt, generatedText]
+        `INSERT INTO logs (user_id, action, email_content, timestamp) VALUES (?, ?, ?, NOW())`,
+        [userId, "generated", generatedText]
       );
 
     res.json({
