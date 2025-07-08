@@ -65,29 +65,33 @@ const EmailHistory = () => {
     navigate('/email-generation');
   };
 
-  // Fetch logs from API
-  const fetchLogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("/api/analytics/user", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      
-      if (response.data) {
-        // Format timestamps
-        const formattedLogs = response.data.map(log => ({
-          ...log,
-          formattedTime: new Date(log.timestamp).toLocaleString()
-        }));
-        setLogs(formattedLogs);
-      }
-    } catch (err) {
-      console.error("Error fetching email logs:", err);
-      setError(err.response?.data?.error || "Failed to load email history");
-    } finally {
-      setLoading(false);
+// Fetch logs from API
+const fetchLogs = useCallback(async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get("/api/analytics/user", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+
+    const logArray = response.data?.logs;
+    
+    if (Array.isArray(logArray)) {
+      // Format timestamps
+      const formattedLogs = logArray.map(log => ({
+        ...log,
+        formattedTime: new Date(log.timestamp).toLocaleString()
+      }));
+      setLogs(formattedLogs);
+    } else {
+      setError("Invalid log format received");
     }
-  }, []);
+  } catch (err) {
+    console.error("Error fetching email logs:", err);
+    setError(err.response?.data?.error || "Failed to load email history");
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   // Load logs on component mount
   useEffect(() => {
