@@ -241,7 +241,7 @@ const EmailAssistant = () => {
       });
 
       const response = await api.post(
-        "/api/email/send",
+        "/api/send/index",
         formData,
         { 
           headers: { 
