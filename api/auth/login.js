@@ -1,7 +1,7 @@
 // /api/auth/login.js
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const db = require('../utils/db');
+import db from '../utils/db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
