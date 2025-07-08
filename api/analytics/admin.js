@@ -37,7 +37,7 @@ export default async function handler(req, res) {
         [userId]
       );
 
-    res.status(200).json({ logs });
+    res.status(200).json(logs);
   } catch (err) {
     console.error('Admin Fetch Logs Error:', err);
     res.status(500).json({ error: 'Failed to fetch user logs' });
