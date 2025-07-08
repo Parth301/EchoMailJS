@@ -1,7 +1,6 @@
 // /api/send/index.js
-const nodemailer = require('nodemailer');
-const verifyToken = require('../utils/verifyToken');
-
+import verifyToken from '../utils/verifyToken';
+import nodemailer from 'nodemailer';
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
