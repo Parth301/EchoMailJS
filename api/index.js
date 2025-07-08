@@ -23,5 +23,6 @@ app.use('/api/email', emailRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/send', sendRoutes);
+app.get('/api/health', (req, res) => res.json({ OK: true }));
 // Required for Vercel serverless
 module.exports = app;
