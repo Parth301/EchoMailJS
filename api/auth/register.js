@@ -1,6 +1,6 @@
 // /api/auth/register.js
-const bcrypt = require('bcryptjs');
-const db = require('../utils/db');
+import db from '../utils/db.js';
+import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
