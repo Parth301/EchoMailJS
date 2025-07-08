@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     const [users] = await db
       .promise()
       .query(
-        'SELECT id, email, password, is_admin FROM user WHERE email = ? AND active = 1',
+        'SELECT id, email, password, is_admin FROM users WHERE email = ? AND active = 1',
         [trimmedEmail]
       );
 
