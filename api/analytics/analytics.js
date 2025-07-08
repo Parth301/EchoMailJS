@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verify token
+  // 1. Token verification
   try {
     await new Promise((resolve, reject) => {
       verifyToken(req, res, (err) => {
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   try {
     const conn = db.promise();
 
-    // 1. Total and categorized email actions
+    // 2. Total email stats from logs table
     const [analyticsRows] = await conn.query(`
       SELECT 
         COUNT(*) AS total_emails,
@@ -41,14 +41,14 @@ export default async function handler(req, res) {
       WHERE user_id = ?;
     `, [userId]);
 
-    let analytics = analyticsRows[0] || {
+    const analytics = analyticsRows[0] || {
       total_emails: 0,
       generated_count: 0,
       refined_count: 0,
       sent_count: 0
     };
 
-    // 2. Weekday trend (Sun–Sat)
+    // 3. Weekly trend (Sun–Sat)
     const [trendRows] = await conn.query(`
       SELECT 
         DATE_FORMAT(created_at, '%a') AS day,
@@ -74,11 +74,11 @@ export default async function handler(req, res) {
       trend
     };
 
-    console.log("✅ Analytics Response:", response);
-    res.json(response);
+    console.log('✅ Analytics Response:', response);
+    return res.json(response);
 
   } catch (err) {
     console.error('❌ Analytics Error:', err);
-    res.status(500).json({ error: 'Failed to fetch analytics' });
+    return res.status(500).json({ error: 'Failed to fetch analytics' });
   }
 }
