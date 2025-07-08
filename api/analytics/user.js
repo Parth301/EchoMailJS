@@ -1,13 +1,11 @@
-// /api/analytics/user.js
-import db from '../utils/db.js';
-import verifytoken from '../utils/verifyToken';
+import db from '../../utils/db.js';
+import verifyToken from '../../utils/verifyToken.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verify token
   try {
     await new Promise((resolve, reject) => {
       verifyToken(req, res, (err) => {
@@ -16,16 +14,22 @@ export default async function handler(req, res) {
       });
     });
   } catch (err) {
+    console.error('Token verification failed:', err);
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const userId = req.user.id;
+  console.log('Token verified, user:', req.user);
+
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'No user ID' });
 
   try {
-    const [logs] = await db.promise().query(
-      `SELECT action, prompt, response, created_at FROM logs WHERE user_id = ? ORDER BY created_at DESC`,
-      [userId]
-    );
+    const [logs] = await db
+      .promise()
+      .query(
+        `SELECT action, prompt, response, created_at FROM logs WHERE user_id = ? ORDER BY created_at DESC`,
+        [userId]
+      );
 
     res.json({ logs });
   } catch (err) {
