@@ -1,4 +1,4 @@
-// /api/admin/logs/[id].js
+// /api/analytics/admin.js
 import db from '../utils/db.js';
 import verifyToken from '../utils/verifyToken.js';
 
@@ -9,37 +9,27 @@ export default async function handler(req, res) {
 
   try {
     await new Promise((resolve, reject) => {
-      verifyToken(req, res, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
+      verifyToken(req, res, (err) => (err ? reject(err) : resolve()));
     });
   } catch (err) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const requester = req.user;
-  const userId = req.query.id;
-
   if (!requester?.is_admin) {
     return res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
 
   try {
-    const [logs] = await db
+    const [users] = await db
       .promise()
       .query(
-        `SELECT id, timestamp, action, email_content 
-         FROM logs 
-         WHERE user_id = ? 
-         ORDER BY timestamp DESC 
-         LIMIT 100`,
-        [userId]
+        `SELECT id, email, created_at FROM users WHERE is_admin = 0 AND active = 1 ORDER BY created_at DESC`
       );
 
-    res.status(200).json(logs); 
+    res.status(200).json(users); // ✅ flat list only
   } catch (err) {
-    console.error('Admin Fetch Logs Error:', err);
-    res.status(500).json({ error: 'Failed to fetch user logs' });
+    console.error('Admin Fetch Users Error:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
   }
 }
