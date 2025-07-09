@@ -424,26 +424,24 @@ const AdminDashboard = () => {
   }, [searchTerm, users]);
 
   const fetchUserLogs = async (userId) => {
-    const token = localStorage.getItem("token");
-    try {
-      const logsResponse = await axios.get(
-        `/api/admin/logs/${userId}`, 
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+  const token = localStorage.getItem("token");
+  try {
+    const logsResponse = await axios.get(
+      `/api/analytics/admin?id=${userId}`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      );
-
-      setLogs(logsResponse.data);
-      setSelectedUser(userId);
-    } catch (err) {
-      console.error("Fetch Logs Error:", err);
-      handleError(err.response?.data?.error || "Failed to fetch user logs");
-    }
-  };
-
+      }
+    );
+    setLogs(logsResponse.data);
+    setSelectedUser(userId);
+  } catch (err) {
+    console.error("Fetch Logs Error:", err);
+    handleError(err.response?.data?.error || "Failed to fetch user logs");
+  }
+};
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("is_admin");
