@@ -1,6 +1,7 @@
 // /api/email/send.js
 import nodemailer from 'nodemailer';
 import formidable from 'formidable';
+import fs from 'fs/promises'; // ✅ Added for reading file buffers
 import verifyToken from '../utils/verifyToken.js';
 import db from '../utils/db.js';
 
@@ -11,7 +12,9 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   // ✅ Verify token
   try {
@@ -23,7 +26,9 @@ export default async function handler(req, res) {
   }
 
   const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: 'User ID missing from token' });
+  if (!userId) {
+    return res.status(401).json({ error: 'User ID missing from token' });
+  }
 
   // ✅ Parse multipart form data (attachments + text fields)
   const form = formidable({ multiples: true });
@@ -49,7 +54,7 @@ export default async function handler(req, res) {
     const fileArray = Array.isArray(files.attachments) ? files.attachments : [files.attachments];
 
     for (const file of fileArray) {
-      const buffer = await file.toBuffer();
+      const buffer = await fs.readFile(file.filepath); // ✅ Read file from disk
       attachments.push({
         filename: file.originalFilename,
         content: buffer,
@@ -68,14 +73,13 @@ export default async function handler(req, res) {
 
   try {
     const mailOptions = {
-  from: `"EchoMail" <${process.env.GMAIL_USER}>`,
-  to: recipient,
-  subject: subject,
-  text: emailContent, // plain fallback
-  html: `<div style="white-space: pre-line; font-family: Arial, sans-serif;">${emailContent}</div>`,
-  attachments,
-};
-
+      from: `"EchoMail" <${process.env.GMAIL_USER}>`,
+      to: recipient,
+      subject: subject,
+      text: emailContent, // plain fallback
+      html: `<div style="white-space: pre-line; font-family: Arial, sans-serif;">${emailContent}</div>`,
+      attachments,
+    };
 
     const info = await transporter.sendMail(mailOptions);
 
